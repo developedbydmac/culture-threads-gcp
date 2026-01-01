@@ -1,0 +1,50 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# GCP credentials
+*.json
+!sample-credentials.json
+.gcp/
+
+# Secrets & Environment
+.env
+.env.local
+.env.*.local
+secrets/
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Kubernetes secrets
+k8s/secrets/
+k8s/*-secret.yaml
+
+# Python (if you add scripts)
+__pycache__/
+*.py[cod]
+venv/
+.python-version
