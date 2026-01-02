@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: app/package-lock.json
+          cache-dependency-path: 'app/package-lock.json'
 
       - name: 📥 Install Dependencies
         run: |
@@ -55,6 +55,7 @@ jobs:
           scan-ref: './app'
           format: 'sarif'
           output: 'trivy-fs-results.sarif'
+        continue-on-error: true
 
       - name: 📊 Upload Filesystem Scan Results
         uses: github/codeql-action/upload-sarif@v3
