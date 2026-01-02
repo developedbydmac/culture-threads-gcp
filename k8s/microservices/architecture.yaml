@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microservices-architecture
+  namespace: culture-threads
+data:
+  architecture.md: |
+    # Culture Threads Microservices Architecture
+    
+    ## Overview
+    Our platform combines custom Culture Threads services with Google Online Boutique 
+    microservices to demonstrate a comprehensive, production-ready cloud-native architecture.
+    
+    ## Service Mesh Architecture
+    
+    ### Culture Threads Services (Primary)
+    1. **culture-threads-api** - Main API service
+       - Express.js REST API
+       - Cultural content management
+       - User authentication & authorization
+       - Prometheus metrics exposed
+    
+    2. **culture-threads-frontend** - Web frontend (Planned)
+       - React.js SPA
+       - Cultural thread browsing
+       - User interaction interface
+    
+    3. **culture-threads-auth** - Authentication service (Planned)
+       - JWT token management
+       - OAuth integration
+       - User profile management
+    
+    4. **culture-threads-content** - Content management (Planned)
+       - Content moderation
+       - Media processing
+       - Search indexing
+    
+    ### Google Online Boutique Services (Demo)
+    1. **frontend** - E-commerce web UI
+    2. **adservice** - Advertisement service
+    3. **cartservice** - Shopping cart management
+    4. **checkoutservice** - Checkout processing
+    5. **currencyservice** - Currency conversion
+    6. **emailservice** - Email notifications
+    7. **paymentservice** - Payment processing
+    8. **productcatalogservice** - Product catalog
+    9. **recommendationservice** - ML-based recommendations
+    10. **shippingservice** - Shipping calculations
+    11. **loadgenerator** - Traffic simulation
+    
+    ## Infrastructure Components
+    
+    ### Kubernetes Cluster (GKE)
+    - 6-node cluster with auto-scaling
+    - Workload Identity for secure service account access
+    - Network policies for micro-segmentation
+    - Resource quotas and limits
+    
+    ### Service Mesh (Istio) - Planned
+    - Traffic management and routing
+    - Security policies and mTLS
+    - Observability and tracing
+    - Canary deployments
+    
+    ### Data Layer
+    - **Cloud SQL** - Relational data (user profiles, content metadata)
+    - **Cloud Firestore** - Real-time data (comments, reactions)
+    - **Cloud Storage** - Media files and assets
+    - **Redis** - Session storage and caching
+    
+    ### Observability Stack
+    - **Prometheus** - Metrics collection
+    - **Grafana** - Visualization and dashboards
+    - **AlertManager** - Alert routing and notifications
+    - **Jaeger** - Distributed tracing (planned)
+    
+    ## Communication Patterns
+    
+    ### Synchronous Communication
+    - REST APIs for client-service communication
+    - gRPC for internal service-to-service communication
+    - GraphQL federation for unified API layer (planned)
+    
+    ### Asynchronous Communication
+    - Cloud Pub/Sub for event-driven messaging
+    - Event sourcing for audit trails
+    - CQRS for read/write separation (planned)
+    
+    ## Deployment Strategy
+    
+    ### GitOps with ArgoCD
+    - Declarative infrastructure and application configs
+    - Automated deployment pipelines
+    - Environment promotion workflows
+    - Rollback capabilities
+    
+    ### CI/CD Pipeline
+    - GitHub Actions for build and test
+    - Container scanning for security
+    - Multi-environment deployments
+    - Feature flag management (planned)
+    
+    ## Security Architecture
+    
+    ### Authentication & Authorization
+    - OAuth 2.0 / OpenID Connect
+    - JWT token validation
+    - Role-based access control (RBAC)
+    - API rate limiting
+    
+    ### Network Security
+    - VPC with private subnets
+    - Network security groups
+    - Web Application Firewall (planned)
+    - DDoS protection
+    
+    ### Container Security
+    - Non-root container execution
+    - Image vulnerability scanning
+    - Pod security policies
+    - Resource constraints
+    
+    ## Monitoring & Alerting
+    
+    ### Application Metrics
+    - Request rate, latency, errors (RED metrics)
+    - Business metrics (user engagement, content views)
+    - Custom application metrics
+    
+    ### Infrastructure Metrics
+    - Node health and resource utilization
+    - Pod lifecycle and restarts
+    - Network and storage performance
+    
+    ### Alerting Rules
+    - Critical: Service down, high error rate
+    - Warning: High latency, resource pressure
+    - Info: Deployment events, scaling events
+    
+    ## Future Enhancements
+    
+    ### Advanced Features
+    - Service mesh with Istio
+    - Multi-region deployment
+    - Advanced ML/AI features
+    - Real-time analytics
+    
+    ### Operational Excellence
+    - Chaos engineering
+    - Performance testing
+    - Cost optimization
+    - Compliance automation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservices-info
+  namespace: culture-threads
+  annotations:
+    prometheus.io/scrape: "false"
+spec:
+  selector:
+    app: nonexistent
+  ports:
+  - port: 80
+  type: ClusterIP
