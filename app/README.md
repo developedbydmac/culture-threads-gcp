@@ -154,3 +154,4 @@ The project includes GitHub Actions workflows for:
 
 MIT License - see LICENSE file for details.
 # Ready for deployment! 🚀
+# Container registry ready! 📦
