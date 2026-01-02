@@ -3,6 +3,12 @@ variable "project_id" {
   type        = string
 }
 
+variable "project_name" {
+  description = "Project name used for resource naming"
+  type        = string
+  default     = "culture-threads"
+}
+
 variable "region" {
   description = "GCP region for resources"
   type        = string
