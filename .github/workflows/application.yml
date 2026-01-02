@@ -27,6 +27,10 @@ jobs:
     name: 🧪 Test Application
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: read
+      security-events: write
+    
     steps:
       - name: 📦 Checkout Code
         uses: actions/checkout@v4
@@ -60,6 +64,7 @@ jobs:
       - name: 📊 Upload Filesystem Scan Results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true
         with:
           sarif_file: 'trivy-fs-results.sarif'
 
