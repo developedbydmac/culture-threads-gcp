@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: culture-threads-api-service
+  namespace: culture-threads
+  labels:
+    app: culture-threads-api
+    component: backend
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: culture-threads-api
+    component: backend
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: culture-threads-api
+  namespace: culture-threads
+  labels:
+    app: culture-threads-api
+    component: backend
+  annotations:
+    iam.gke.io/gcp-service-account: gke-workload-identity@culture-threads-prod.iam.gserviceaccount.com
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: culture-threads-config
+  namespace: culture-threads
+  labels:
+    app: culture-threads-api
+    component: backend
+data:
+  allowed-origins: "https://culture-threads.com,https://www.culture-threads.com"
+  log-level: "info"
+  max-connections: "100"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: culture-threads-secrets
+  namespace: culture-threads
+  labels:
+    app: culture-threads-api
+    component: backend
+type: Opaque
+data:
+  # Base64 encoded placeholder values - replace with real secrets
+  DATABASE_URL: cGxhY2Vob2xkZXI=  # placeholder
+  REDIS_URL: cGxhY2Vob2xkZXI=     # placeholder

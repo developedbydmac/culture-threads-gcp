@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: culture-threads-api
+  namespace: culture-threads
+  labels:
+    app: culture-threads-api
+    component: backend
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: culture-threads-api
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: culture-threads-api
+        component: backend
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/health"
+    spec:
+      serviceAccountName: culture-threads-api
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+      - name: api
+        image: gcr.io/culture-threads-prod/culture-threads-api:latest
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: culture-threads-config
+              key: allowed-origins
+        envFrom:
+        - secretRef:
+            name: culture-threads-secrets
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          periodSeconds: 5
+          failureThreshold: 2
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: app-cache
+          mountPath: /app/.npm
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: app-cache
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - culture-threads-api
+              topologyKey: kubernetes.io/hostname

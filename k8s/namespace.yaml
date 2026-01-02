@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: culture-threads
+  labels:
+    name: culture-threads
+    istio-injection: disabled
+  annotations:
+    scheduler.alpha.kubernetes.io/node-selector: "cloud.google.com/gke-preemptible=false"
