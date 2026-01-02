@@ -12,9 +12,13 @@ override.tf.json
 *_override.tf.json
 
 # GCP credentials
-*.json
-!sample-credentials.json
+gcp-key.json
+service-account.json
 .gcp/
+
+# Keep package.json files for applications
+!package.json
+!**/package.json
 
 # Secrets & Environment
 .env
