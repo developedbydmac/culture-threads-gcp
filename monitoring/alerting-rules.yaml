@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alerting-rules
+  namespace: monitoring
+data:
+  alerting_rules.yml: |
+    groups:
+    - name: culture-threads.rules
+      rules:
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash looping"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting {{ $value }} times per second"
+
+      - alert: PodNotReady
+        expr: kube_pod_status_ready{condition="false"} > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod {{ $labels.pod }} not ready"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been in a non-ready state for more than 15 minutes"
+
+      - alert: DeploymentReplicasMismatch
+        expr: kube_deployment_status_replicas_available != kube_deployment_spec_replicas
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Deployment {{ $labels.deployment }} has mismatched replicas"
+          description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has {{ $value }} available replicas, expected {{ $labels.spec_replicas }}"
+
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes{pod=~"culture-threads-api-.*"} / container_spec_memory_limit_bytes{pod=~"culture-threads-api-.*"}) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using {{ $value }}% of its memory limit"
+
+      - alert: HighCPUUsage
+        expr: (rate(container_cpu_usage_seconds_total{pod=~"culture-threads-api-.*"}[5m])) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using {{ $value }}% CPU"
+
+      - alert: ApplicationDown
+        expr: up{job="culture-threads-api"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Culture Threads API is down"
+          description: "Culture Threads API has been down for more than 5 minutes"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="culture-threads-api"}[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="culture-threads-api",status=~"5.."}[5m]) / rate(http_requests_total{job="culture-threads-api"}[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}%"
+
+    - name: infrastructure.rules
+      rules:
+      - alert: NodeNotReady
+        expr: kube_node_status_ready{condition="false"} > 0
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.node }} is not ready"
+          description: "Node {{ $labels.node }} has been in a NotReady state for more than 15 minutes"
+
+      - alert: NodeMemoryPressure
+        expr: kube_node_status_condition{condition="MemoryPressure",status="true"} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Node {{ $labels.node }} under memory pressure"
+          description: "Node {{ $labels.node }} is under memory pressure"
+
+      - alert: NodeDiskPressure
+        expr: kube_node_status_condition{condition="DiskPressure",status="true"} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Node {{ $labels.node }} under disk pressure"
+          description: "Node {{ $labels.node }} is under disk pressure"
+
+      - alert: PVCStorageRunningFull
+        expr: kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PVC {{ $labels.persistentvolumeclaim }} is running full"
+          description: "PVC {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} is {{ $value }}% full"
+
+    - name: monitoring.rules
+      rules:
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus has been down for more than 5 minutes"
+
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Grafana is down"
+          description: "Grafana has been down for more than 5 minutes"

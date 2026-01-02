@@ -42,6 +42,8 @@ spec:
           mountPath: /etc/prometheus/
         - name: prometheus-storage-volume
           mountPath: /prometheus/
+        - name: alerting-rules-volume
+          mountPath: /etc/prometheus/rules/
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -54,6 +56,10 @@ spec:
           name: prometheus-config
       - name: prometheus-storage-volume
         emptyDir: {}
+      - name: alerting-rules-volume
+        configMap:
+          defaultMode: 420
+          name: alerting-rules
 ---
 apiVersion: v1
 kind: Service

@@ -1,0 +1,170 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  kubernetes-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Kubernetes Infrastructure Overview",
+        "tags": ["kubernetes", "infrastructure", "gke"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Cluster Nodes",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "count(kube_node_info)",
+                "legendFormat": "Total Nodes"
+              }
+            ],
+            "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Ready Nodes",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(kube_node_status_ready{condition=\"true\"})",
+                "legendFormat": "Ready"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Total Pods",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "count(kube_pod_info)",
+                "legendFormat": "Total Pods"
+              }
+            ],
+            "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Running Pods",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(kube_pod_status_ready{condition=\"true\"})",
+                "legendFormat": "Running"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "yellow", "value": 5},
+                    {"color": "green", "value": 10}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0}
+          },
+          {
+            "id": 5,
+            "title": "Node CPU Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+                "legendFormat": "CPU Usage % - {{instance}}"
+              }
+            ],
+            "yAxes": [
+              {"max": 100, "min": 0, "unit": "percent"}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}
+          },
+          {
+            "id": 6,
+            "title": "Node Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+                "legendFormat": "Memory Usage % - {{instance}}"
+              }
+            ],
+            "yAxes": [
+              {"max": 100, "min": 0, "unit": "percent"}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}
+          },
+          {
+            "id": 7,
+            "title": "Pod Restarts (Last 24h)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "increase(kube_pod_container_status_restarts_total[24h])",
+                "legendFormat": "Restarts - {{namespace}}/{{pod}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}
+          },
+          {
+            "id": 8,
+            "title": "Namespace Resource Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(container_memory_usage_bytes{container!=\"POD\"}) by (namespace) / 1024 / 1024 / 1024",
+                "legendFormat": "Memory GB - {{namespace}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}
+          },
+          {
+            "id": 9,
+            "title": "Disk Usage by Node",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - ((node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"}) * 100)",
+                "legendFormat": "Disk Usage % - {{instance}} {{mountpoint}}"
+              }
+            ],
+            "yAxes": [
+              {"max": 100, "min": 0, "unit": "percent"}
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 22}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "timepicker": {},
+        "templating": {"list": []},
+        "annotations": {"list": []},
+        "refresh": "30s",
+        "schemaVersion": 30,
+        "version": 1
+      }
+    }
