@@ -13,12 +13,8 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy application code
 COPY server.js ./
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S node -u 1001 -G nodejs
-
-# Change ownership of the app directory
-RUN chown -R node:nodejs /app
+# Use existing node user and set permissions
+RUN chown -R node:node /app
 USER node
 
 # Expose port
